@@ -1,6 +1,9 @@
 provider "aws" {
   region = "us-east-2"
   }
+variable "key_name" {
+  type = string
+}
   resource "aws_instance" "app" {
   ami = "ami-0e55e373"
   instance_type = "t1.micro"
