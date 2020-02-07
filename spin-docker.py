@@ -29,6 +29,12 @@ def PrepareEnvironmentVars(environmentName, action):
         envArray['WEB_GUEST_PORT'] = envArray['DEV_WEB_GUEST_PORT']
         envArray['WEB_HOST_SECURE_PORT'] = envArray['DEV_WEB_HOST_SECURE_PORT']
         envArray['WEB_GUEST_SECURE_PORT'] = envArray[devwebsport]
+    if(environmentName == 'stage'):
+        envArray['AWS_SECRET_ACCESS_KEY'] = envArray['STAGE_MEETUP_SECRET']
+        envArray['AWS_ACCESS_KEY_ID'] = envArray['STAGE_MEETUP_KEY']
+        envArray['TF_VAR_zone_id']=envArray['STAGE_HOSTED_ZONE_ID']
+        envArray['TF_VAR_key_name']= envArray['STAGE_KEYPAIR_NAME']
+        envArray['ANSIBLE_HOST_KEY_CHECKING']= 'False'
     return envArray
 
 
@@ -39,6 +45,8 @@ def PrepareEnvironmentVars(environmentName, action):
                     type=click.Choice(["up", "destroy"]))
 @click.option("-d", "--debug", required=False, default="no",
                     type=click.Choice(["yes", "no"]))
+@click.option("-m", "--method", required=False, default="terraform",
+                    type=click.Choice(["terraform", "kubernetes"]))
 def main(environment, action, debug):
     machineName = environment
     envVars = machineName
@@ -55,6 +63,18 @@ def main(environment, action, debug):
     if(action == "destroy"):
         command = "docker-compose down -v --rmi all --remove-orphans"
         subprocess.Popen(command, env=envVars, shell=True)
+
+class stager:
+    def __init__(self, action, method):
+        self.envvars=PrepareEnvironmentVars('stage', action)
+        self.method = method
+    def raise_stage_env(self):
+        if self.method == 'terraform':
+            return self.raiseterraform
+    def raiseterraform(self):
+        subprocess.call('./terrabash',env=self.envvars,shell=True)
+
+
 
 
 if __name__ == '__main__':

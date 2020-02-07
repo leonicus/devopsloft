@@ -14,12 +14,15 @@ ENV LANG=en_US.UTF-8
 COPY requirements-docker.txt /home/
 RUN pip install -r /home/requirements-docker.txt
 RUN pip install docker-compose
-COPY .env spin-docker.py docker-compose.yml createPemFiles.py  /home/
+COPY .env .env.local spin-docker.py docker-compose.yml createPemFiles.py  /home/
 COPY web_s2i /home/web_s2i/
 COPY db_s2i  /home/db_s2i
 COPY app_s2i  /home/app_s2i
 COPY modules  /home/modules
 COPY vault /home/vault
+RUN mkdir -p ~/.terraform.d/plugins
+COPY terraform /terraform/
+COPY terraform/terraform /usr/bin/
 RUN mkdir -p /home/vault/config
 RUN chmod 777 /home/vault
 RUN curl -sSL https://get.docker.com/ | sh

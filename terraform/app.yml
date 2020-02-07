@@ -1,0 +1,48 @@
+---
+- hosts: app
+  tasks:
+  - name: copy app
+    become: true
+    copy:
+      src: /home/app_s2i/
+      dest: /
+
+  - name: copy modules
+    copy:
+      src: /home/modules
+      dest: /modules
+
+  - name: copy env
+    become: true
+    copy:
+      src: /home/.env
+      dest: /
+  
+  - name: Update APT Cache
+    apt:
+    update_cache: yes
+    force_apt_get: yes
+
+  - name: Remove apt lock file
+    file:
+     state: absent
+     path: "/var/lib/dpkg/lock"
+    become: yes
+
+  - name: Update repositories cache and install "pip" package
+    apt:
+     name: python3-pip
+  - name: install mysql dev for flask_mysqldb
+    apt:
+     name: libmysql-client-dev
+     update_cache: yes
+  - name: install requirements
+    pip:
+    requirements: /requirements.txt
+    executable: pip3
+
+  - name: Run App
+    become: true
+    shell: cd /; nohup python ./application.py </dev/null >/dev/null 2>&1 &
+
+      

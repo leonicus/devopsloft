@@ -1,0 +1,5 @@
+terraform init
+terraforapply-auto-approve
+terraform output private_key > privkey.pem
+chmod 600 privkey.pem
+ansible-playbook -i terraform.py app.yml
